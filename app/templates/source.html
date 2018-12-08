@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Chord Chart</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: 16px;
+            width: 960px;
+            margin: 1em auto;
+        }
+        /* Specific Style */
+        
+        #circle circle {
+            fill: none;
+            pointer-events: all;
+        }
+        
+        .group path {
+            fill-opacity: .5;
+        }
+        
+        path.chord {
+            stroke: #000;
+            stroke-width: .25px;
+        }
+        
+        #circle:hover path.fade {
+            display: none;
+        }
+        
+        svg {
+            margin-left: 115px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="vis"></div>
+
+    <script src="{{url_for('static', filename= " js/d3.v4.min.js ") }}"></script>
+    <script src="{{url_for('static', filename=" js/d3-queue.min.js ")}}"></script>
+    <script src="{{url_for('static', filename=" js/d3-chord.v0.0.min.js ")}}"></script>
+    <script>
+        var width = 720,
+            height = 720,
+            outerRadius = Math.min(width, height) / 2 - 10,
+            innerRadius = outerRadius - 24;
+
+        var formatPercent = d3.format(".1%");
+
+        var arc = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(outerRadius);
+
+        var path = d3.ribbon()
+            .radius(innerRadius);
+
+        var chord_layout = d3.chord()
+            .padAngle(0.01)
+            .sortSubgroups(d3.descending)
+            .sortGroups(d3.descending);
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("id", "circle")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        svg.append("circle")
+            .attr("r", outerRadius);
+
+        d3.queue()
+            .defer(d3.json, "/static/data/matrizAeropuertos.json")
+            .await(ready);
+
+        function ready(error, data) {
+            if (error) throw error;
+
+            var matrix = data.valuesData;
+            log(matrix)
+            var cities = data.entities;
+            var extended_info = data.extended_entities;
+
+            var chord = chord_layout(matrix);
+
+            var colorScale = d3.scaleOrdinal(d3.schemeCategory20b);
+
+            // Añadimos una grupo por cada aeropuerto.
+            var group = svg.selectAll(".group")
+                .data(chord.groups)
+                .enter().append("g")
+                .attr("class", "group")
+                .on("mouseover", mouseover);
+
+            // Añadimos un campo title que se mostrará automaticamente en el mouseover.
+            group.append("title").text(function(d, i) {
+                return extended_info[cities[i]].long + ": " + d.value + " routes";
+            });
+
+            // Dibujamos cada grupo como un arco.
+            var groupPath = group.append("path")
+                .attr("id", function(d, i) {
+                    return "group" + i;
+                })
+                .attr("d", arc)
+                .style("fill", function(d, i) {
+                    return colorScale(i);
+                });
+
+            // Y a cada arco le añadimos un nombre.
+            var groupText = group.append("text")
+                .attr("x", 6)
+                .attr("dy", 15);
+
+            groupText.append("textPath")
+                .attr("xlink:href", function(d, i) {
+                    return "#group" + i;
+                })
+                .text(function(d, i) {
+                    return extended_info[cities[i]].short;
+                });
+
+            // Para cada par de valores ciudad1-ciudad2 y ciudad2-ciudad1 se dibuja una cuerda
+            var chord = svg.selectAll(".chord")
+                .data(chord)
+                .enter().append("path")
+                .attr("class", "chord")
+                .style("fill", function(d, i) {
+                    return colorScale(d.target.index);
+                })
+                .attr("d", path);
+
+            // Añadimos un campo title como en el caso de los arcos pero algo más detellado
+            chord.append("title").text(function(d) {
+                return extended_info[cities[d.source.index]].long +
+                    " → " + extended_info[cities[d.target.index]].long +
+                    ": " + d.source.value +
+                    "\n" + extended_info[cities[d.target.index]].long +
+                    " → " + extended_info[cities[d.source.index]].long +
+                    ": " + d.target.value;
+            });
+
+            function mouseover(d, i) {
+                chord.classed("fade", function(p) {
+                    return p.source.index != i &&
+                        p.target.index != i;
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

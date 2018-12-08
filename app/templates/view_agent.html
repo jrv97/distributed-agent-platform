@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% block content%}
+
+<div class="container-fluid ">
+    <div class="page-header">
+        <h3> Modify Agent </h3>
+    </div>
+
+    <div class="row">
+        <div class="container col-sm-4 panel">
+            <div class="panel-body ">
+
+                <form class="form form-group" action="http://localhost:5000/agents/modify" method="POST">
+                    <p>
+                        <label> Agent Name </label>
+                        <input class="form-control" type="text" name="agent_name" value="{{ agent.name }}" required>
+
+                    </p>
+
+                    <fieldset>
+                        <div class="form-group">
+
+                            <legend> Functionalities </legend>
+                            {% for func in functionalities %}
+                            <p><label class="choice"> <input type="checkbox" name="{{ func }}" {% if active_func[func] %} checked {% endif
+									 %}> {{ func }} </label></p>
+                            {% endfor %}
+                    </fieldset>
+                    </div>
+                    <div class="form-group">
+                        <label> Notes </label>
+                        <textarea class="text" rows="5" name="notes" maxlength="500"> {{ agent.comments }} </textarea>
+                    </div>
+                    <input type="hidden" name="aid" value="{{ agent.aid }}">
+                    <p><input class="button btn btn-primary" type="submit" name="modify" value="Modify" /></p>
+
+                </form>
+
+                <form class="form" action="http://localhost:5000/agents/remove" method="POST">
+                    <input type="hidden" name="aid" value="{{ agent.aid }}">
+                    <p><input class="button btn btn-danger" type="submit" name="remove" value="Delete" /></p>
+                </form>
+
+                <form class="form" action="http://localhost:5000/agents/register" method="POST">
+                    <input class="button btn btn-link" type="submit" name="register" value="{{ registration }}">
+                    <input type="hidden" name="aid" value="{{ agent.aid }}">
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}

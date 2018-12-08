@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block content %}
+<div class="container-fluid ">
+<div class="page-header"> <h3> Search </h3> </div>
+
+<div class="row"  >
+<div class="container col-sm-4 panel">
+<div class="panel-body ">
+        <div class="row">
+        <form class="form" action="http://localhost:5000/search/search_by_aid" method="POST">
+        <div class="form-group form-group-sm" >
+                <h4>  Search by id </h4>
+                <input class="form-control" type="search" name="aid_search">
+        </div>
+        <input class="btn btn-primary" type="submit" value="Go">
+        </form>
+        </div>
+        <p> </p>
+        <div class="container">
+        <div class="row" >
+        <div class="container-fluid">
+            <ul class="list-group">
+            {% for agent in aid_result %}
+            <li class="list-group-item"> 
+                <p> Id: {{ agent.aid }} </p>
+                <p> Funcionalidades </p>
+                <ul>
+                    {% for func in agent.functionalities %}
+                        <li> {{ func }} </li>
+                    {% endfor %}
+                    </ul>
+                <p> Notes: {{ agent.comments }} </p>
+                
+            </li>
+            {% endfor %}
+            </ul>
+        </div></div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="container-fluid ">
+<div class="row"  >
+<div class="container col-sm-4 panel">
+<div class="panel-body " style="background-color:#ffeead">
+    <form class="form-group" action="http://localhost:5000/search/search_by_func" method="POST" >
+        <h4> Search by functionality </h4> 
+
+
+        {% for func in functionalities %}
+        <p><label class="choice"> <input type="checkbox" name="{{func}}" > {{ func }} </label></p>
+        {% endfor %}
+        <input class="btn btn-primary" type="submit" value="Go">
+    </form>
+    <p> </p>
+
+    <ul class="list-group">
+            {% for agent in func_result %}
+            <li class="list-group-item"> 
+                <p> Id: {{ agent.aid }} </p>
+                <p> Funcionalidades </p>
+                <ul>
+                    {% for func in agent.functionalities %}
+                        <li> {{ func }} </li>
+                    {% endfor %}
+                    </ul>
+                <p> Notes: {{ agent.comments }} </p>
+                
+            </li>
+            {% endfor %}
+            </ul>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block content%}
+
+<div class="container-fluid ">
+    <div class="page-header">
+        <h3> Local Agents </h3>
+    </div>
+
+    <div class="row">
+        <div class="container col-sm-4 panel">
+            <div class="panel-body ">
+
+
+                <form class="form" action="http://localhost:5000/agents/result" method="POST">
+                    <ul class="list-group">
+                        {% for agent_aid in agent_list %}
+                        <li class="list-group-item"> <input class="button btn btn-link" type="submit" name="modify" value="{{ agent_aid[0] }}">
+                            <form class="form" action="http://localhost:5000/agents/register" method="POST">
+                                <p> {{ agent_aid[1][0] }} </p>
+                                <input type="hidden" name="aid" value="{{ agent_aid[0] }}">
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
